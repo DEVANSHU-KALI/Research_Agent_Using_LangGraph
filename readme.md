@@ -11,5 +11,11 @@ Each and every script and concept will be explained individually in different fi
 
 This project can run using streamlit frontend working with fastapi backend and also using the langgraph studio which gives you a very beautiful interface to interact with the graph.
 
+### How to run
+- no matter what way you go with, you need to start the qdrant database lying in the docker container if you have it inside that. so ets start with the ingestion stage.
 
+#### Ingestion stage.
+- 
 
+#### to get streamlit frontend
+- we need to start both the backend and 
