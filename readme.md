@@ -44,12 +44,19 @@ After getting this work done, run the command:
 ```bash
 python -m .\one_time\qdrant_client
 ```
-- this will create collection naming `research_agent` as its mentioned in the qdrant_client script.
+- this will create collection naming `research_agent` as its mentioned in the qdrant_client script. Wait for while, which will result you something like `Collection Created` in the terminal log. 
 
 Next comes the final step of ingestion, to push data into the collection. Run the following command:
 ```bash
 python -m .\one_time\ingest_documents
 ```
+- wait for a while, until you see a positive sign with the following two sentences in the terminal log, with some number in those place holder.
+    - Generated {len(documents)} chunks 
+    - Uploaded {len(points)} chunks to Qdrant  
+- first sentence tells, how many chunks got created, which was done by the chunking method we used. 
+- second one tells, how many chunks got pushed into the database.
+- you may see both the sentences getting printed with some gap between them, no worries the second is the last thing getting printed into the terminal log.
 
+Now the ingestion stay is completed, you can go into the port and that collection space and see how many points (chunks) you got into the database, and you can also see what those chunks contains, as we included text as metadata to the points.
 #### to get streamlit frontend
 - we need to start both the backend and 
