@@ -76,3 +76,13 @@ start frontend using the following command:
 ```bash
 streamlit run app.py
 ```
+- wait for some seconds and you'll see the localhost port in the terminal log, which appears just when your frontend is started. \
+
+#### Now lets explore the langgraph studio way of execution, whcih I, recommend to use atleast once.
+- staying in the root path, run:
+```bash
+langgraph dev
+```
+- now wait for a while, you'll be redirected into the page byt its own. If not, you can also see the studio link in the terminal log, you can also go into the page through that link.
+- but if on the first run, you are not redirected or somehow even getting a error in the page if you go through that link, there is no need to worry, it will work again by itself, like, close the page and go through the link again, open the graph_builder script and try to save that once, it will work somehow by itself.
+- Even till now I didnt understand why I get the error even if every code is perfect, only regarding this langgraph studio execution, I mostly got that error, and dont know how it got resolved by its own again after refreshing the page, or saving the graph_builder script even if there are no changes.
