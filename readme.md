@@ -58,5 +58,21 @@ python -m .\one_time\ingest_documents
 - you may see both the sentences getting printed with some gap between them, no worries the second is the last thing getting printed into the terminal log.
 
 Now the ingestion stay is completed, you can go into the port and that collection space and see how many points (chunks) you got into the database, and you can also see what those chunks contains, as we included text as metadata to the points.
-#### to get streamlit frontend
-- we need to start both the backend and 
+#### Now lets get into the query phase. 
+Spinning up backend and frontend.
+
+To start backend run:
+```bash
+python main.py
+```
+- wait some while this may take time, gradually after sometime, you'll see something like:
+```bash
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+```
+- this the last thing you are going to see in the terminal log, which confirms your backend is started.
+
+start frontend using the following command:
+```bash
+streamlit run app.py
+```
