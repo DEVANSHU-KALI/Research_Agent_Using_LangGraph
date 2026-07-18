@@ -1,15 +1,76 @@
 ### Hybrid Research Agent built using LangGraph
 
-This system include two retrieval methods, `Semantic retrieval` and  `Internet retrieval`. Based on specific condition, either any one selected or both work parallel, to get more information.  
+This system includes two retrieval methods: `Semantic retrieval` and `Internet retrieval`. Based on specific conditions, either one is selected or both work in parallel to gather maximum information.  
 
-- semantic retrieval is made possible using `Qdrant database` with some ingestion and retrieval logic.
-- internet retrieval is done using the `Tavily Search`
+- Semantic retrieval is made possible using `Qdrant database` with custom ingestion and vector retrieval logic.
+- Internet retrieval is powered by `Tavily Search API`.
 
-Instead of building standard RAG system and combining it with internet retrieval, is used langgraph to make the system totally different from that, mainly going with this langgraph's `Map Reducer` concept, which allowed me to do this work in very reliable way and also reduced the burden of coding manually.
+Instead of building a standard RAG system that simply fetches documents, I leveraged LangGraph to create an advanced, autonomous agentic workflow. This system uses LangGraph's **Map-Reduce** pattern to execute local vector search and live internet retrieval concurrently, drastically speeding up data gathering. Additionally, it incorporates an **Agentic Reflection Loop** with a dedicated Reviewer node that fact-checks the generated output and automatically forces self-correction if an answer is incomplete or inaccurate.
 
 Each and every script and concept will be explained individually in different files.
 
-This project can run using streamlit frontend working with fastapi backend and also using the langgraph studio which gives you a very beautiful interface to interact with the graph.
+This project can run using a Streamlit frontend working with a FastAPI backend, or through LangGraph Studio, which provides a visual interface to interact with the graph.
+
+---
+
+### Project Structure
+
+```text
+research_agent/
+├── data/                      # Source documents & data for ingestion
+├── generation/                # Answer generation & critique logic
+│   ├── generator.py           # Combined answer generator (LLM)
+│   └── reviewer.py            # Reflection reviewer & fact-checker node
+├── one_time/                  # Qdrant setup & ingestion scripts
+│   ├── ingest_documents.py    # Document chunking & embedding ingestion
+│   ├── qdrant_client.py       # Qdrant vector database collection setup
+│   └── embedding_model.py     # HuggingFace embedding model loader
+├── retrievals/                # Context retrieval tools
+│   ├── internet_retrieval.py  # Tavily search API retriever
+│   └── semantic_retrieval.py  # Qdrant vector database retriever
+├── router/                    # Supervisor routing logic
+│   └── query_router.py        # Structured Pydantic router node
+├── app.py                     # Streamlit frontend UI application
+├── main.py                    # FastAPI backend server (REST & SSE Stream)
+├── graph_builder.py           # LangGraph workflow definition & compiled graph
+├── docker-compose.yml         # Qdrant Docker database configuration
+├── langgraph.json             # LangGraph Studio configuration
+└── pyproject.toml             # Project dependencies & packaging specification
+```
+
+---
+
+### Architecture & Workflow Diagram
+
+```mermaid
+graph TD
+    Start([__start__]) --> Supervisor[Supervisor Node]
+    
+    Supervisor -- "'semantic' or 'hybrid'" --> Semantic[Semantic Node]
+    Supervisor -- "'internet' or 'hybrid'" --> Internet[Internet Node]
+    
+    Semantic --> Writer[Writer Node]
+    Internet --> Writer
+    
+    Writer --> Reviewer[Reviewer Node]
+    
+    Reviewer -- "pass OR count >= 5" --> End([__end__])
+    Reviewer -- "fail AND count < 5 (Reflection Loop)" --> Writer
+```
+
+---
+
+### Environment Setup (`.env`)
+
+Before running the project, create a `.env` file in the root directory and add your API keys:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+TAVILY_API_KEY=your_tavily_api_key_here
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
+```
+*Note: These environment variables are essential to power the LLM Router/Reviewer nodes and the Tavily Internet Search retriever.*
 
 ---
 
@@ -42,13 +103,13 @@ http://localhost:6333/dashboard#/collections
 
 After getting this work done, run the command:
 ```bash
-python -m .\one_time\qdrant_client
+python -m one_time.qdrant_client
 ```
 - this will create collection naming `research_agent` as its mentioned in the qdrant_client script. Wait for while, which will result you something like `Collection Created` in the terminal log. 
 
 Next comes the final step of ingestion, to push data into the collection. Run the following command:
 ```bash
-python -m .\one_time\ingest_documents
+python -m one_time.ingest_documents
 ```
 - wait for a while, until you see a positive sign with the following two sentences in the terminal log, with some number in those place holder.
     - Generated {len(documents)} chunks 
@@ -86,4 +147,3 @@ langgraph dev
 - now wait for a while, you'll be redirected into the page byt its own. If not, you can also see the studio link in the terminal log, you can also go into the page through that link.
 - but if on the first run, you are not redirected or somehow even getting a error in the page if you go through that link, there is no need to worry, it will work again by itself, like, close the page and go through the link again, open the graph_builder script and try to save that once, it will work somehow by itself.
 - Even till now I didnt understand why I get the error even if every code is perfect, only regarding this langgraph studio execution, I mostly got that error, and dont know how it got resolved by its own again after refreshing the page, or saving the graph_builder script even if there are no changes.
-
