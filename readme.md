@@ -126,6 +126,7 @@ To start backend run:
 ```bash
 python main.py
 ```
+- you many think, if we are using fastapi as backend, where is that uvicorn command to start the backend, see the main.py script, we configured the script in such way that, we can actually run this command. 
 - wait some while this may take time, gradually after sometime, you'll see something like:
 ```bash
 INFO:     Waiting for application startup.
