@@ -26,7 +26,7 @@ class my_state(TypedDict):
 - **`query`** (`str`): The initial user question received from the frontend/API client.
 - **`decision`** (`str`): Updated by the **Supervisor Node** (Query Router). Takes one of three routing values: `"semantic"`, `"internet"`, or `"hybrid"`.
 - **`retrieval_results`** (`Annotated[list[dict], operator.add]`): 
-  - **Technical Concept: Reducer / Accumulator (`operator.add`)**: Instead of overwriting existing data, `operator.add` appends new retrieval dictionaries into a list.
+  - **Technical Concept: Reducer / Accumulator (`operator.add`)**: Instead of overwriting existing data, `operator.add` appends new retrieval dictionaries into a list. This eliminates over writing, So that in case of `hybrid` decision, and we used parallel execution, both the retrieval system's dictionaries get into the list, and get passed to the `writer node`.
   - When `"hybrid"` decision triggers **parallel execution (Map-Reduce)**, both `semantic` and `internet` nodes fetch data simultaneously and append their contexts into this single list without overwriting each other.
 - **`final_answer`** (`dict`): Updated by the **Writer Node** (`generation/generator.py`). Holds the structured response synthesized from retrieved contexts.
 - **`feedback`** (`str`): Updated by the **Reviewer Node** (`generation/reviewer.py`). Contains critique and instructions if the answer fails quality checks.
