@@ -80,7 +80,7 @@ def route_query(state: my_state):
     decision = state['decision']
     if decision == 'hybrid':
         return ['semantic', 'internet']
-    return [decision]
+    return [decision]  
 
 def route_review(state: my_state):
     status = state.get('review_status', 'pass')
