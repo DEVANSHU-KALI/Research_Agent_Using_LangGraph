@@ -1,11 +1,12 @@
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, Optional
 from router.query_router import client
 
 class ReviewSchema(BaseModel):
     status: Literal["pass", "fail"]
-    feedback: str = Field(
-        description="Detailed feedback if status is 'fail'. Specify what is missing or incorrect. If status is 'pass', leave this empty."
+    feedback: Optional[str] = Field(
+        default="",
+        description="Detailed feedback if status is 'fail'. Specify what is missing or incorrect. If status is 'pass', return an empty string ''."
     )
 
 async def review_answer(query: str, answer: str, retrieval_results: list[dict]) -> dict:
@@ -41,9 +42,9 @@ async def review_answer(query: str, answer: str, retrieval_results: list[dict]) 
     # Print the evaluation status directly to the terminal logs
     print(f"\n--- [REVIEWER NODE] Evaluation Status: {response.status.upper()} ---")
     if response.status == "fail":
-        print(f"Feedback: {response.feedback}\n")
+        print(f"Feedback: {response.feedback or ''}\n")
 
     return {
         'status': response.status,
-        'feedback': response.feedback if response.status == "fail" else ""
+        'feedback': (response.feedback or "") if response.status == "fail" else ""
     }
