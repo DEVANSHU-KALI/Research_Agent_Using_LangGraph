@@ -29,7 +29,7 @@ class my_state(TypedDict):
   - **Technical Concept: Reducer / Accumulator (`operator.add`)**: Instead of overwriting existing data, `operator.add` appends new retrieval dictionaries into a list. This eliminates over writing, So that in case of `hybrid` decision, and we used parallel execution, both the retrieval system's dictionaries get into the list, and get passed to the `writer node`.
   - When `"hybrid"` decision triggers **parallel execution (Map-Reduce)**, both `semantic` and `internet` nodes fetch data simultaneously and append their contexts into this single list without overwriting each other.
 - **`final_answer`** (`dict`): Updated by the **Writer Node** (`generation/generator.py`). Holds the structured response synthesized from retrieved contexts.
-- **`feedback`** (`str`): Updated by the **Reviewer Node** (`generation/reviewer.py`). Contains critique and instructions if the answer fails quality checks.
+- **`feedback`** (`str`): Updated by the **Reviewer Node** (`generation/reviewer.py`). Contains critique and instructions if the answer gets classified as `fail` by the reviewer. This will tell the writer node that, you missed some info or made some mistake the response, so now generate the response again.
 - **`iteration_count`** (`int`): Tracked by the **Writer Node** to count loop cycles. Serves as a **Loop Guard** (max 5 iterations) to prevent infinite reflection loops.
 - **`review_status`** (`str`): Updated by the **Reviewer Node** with either `"pass"` or `"fail"`. Used by the conditional edge to route the flow.
 
