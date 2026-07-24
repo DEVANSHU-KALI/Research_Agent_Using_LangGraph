@@ -35,5 +35,51 @@ async def generate_answer(query: str, retrieval_results: list[dict], feedback: s
     - `query`
     - `retrieval_results` from the retrievals methods
     - `feedback` only in case of `fail`, and thats the reason why, it is kept null by default. code:`str = ""` (tells, it should be string and by default its null)
-- As query can be classified into three retrieval methods by the supervisor node, the next two lines are specifically for the 
+- In case of supervisor node classifies the query to `hyrbrid` retrieval, both the `semantic` and `internet` are ran **parallelly**, which updates the `retrieval_result` key with two **contexts**, and to get that context 
+merged properly seperated by some space, we get that logic here.
+#### example:
+- lets say we have the context as:
+```python
+retrieval_results = [
+    {
+        "source": "semantic",
+        "context": "LangGraph is a library for building stateful agent workflows."
+    },
+    {
+        "source": "internet",
+        "context": "According to the web, LangGraph was released by LangChain."
+    }
+]
+```
+- with the merging it would look like:
+```python
+contexts = [
+    "LangGraph is a library for building stateful agent workflows.",
+    "According to the web, LangGraph was released by LangChain."
+]
+```
+
+> Note: this is only possible because, this graph has the concept of map-reduce, where we take even if one retrieval state updates the key with its context, the second retrieval method's context gets appended to the list. 
+
+```python
+    feedback_instruction = ""
+    if feedback:
+        feedback_instruction = f"\n\nCRITICAL FEEDBACK ON PREVIOUS RESPONSE:\nThe reviewer rejected your last response with this critique:\n\"{feedback}\"\nRead this feedback carefully and completely resolve the issue in your new answer."
+```
+- As the reviewer nodes gives a feedback in case of fail, this is the prompt we got and is combined with the main prompt sent to the llm.
+
+Next we have the main prompt, which takes query and merged context with feedback (option).
+
+```python 
+response = await llm_model.ainvoke([prompt])
+
+    return {
+        'answer': response.content,
+    }
+```
+- Lastly we pass the prompt to the llm and return the response.
+
+---
+
+## reviewer.py
 
