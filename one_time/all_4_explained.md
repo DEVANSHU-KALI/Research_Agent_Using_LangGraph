@@ -207,3 +207,45 @@ def ingest_documents(folder_path: str) -> None:
 ```
 - We isolate all chunk text strings into a list.
 - We call `embedding_model.embed_documents()` to generate the dense vector representation for each chunk in a single batch.
+
+```python
+    #create qdrant points
+    points = []
+
+    for document, embedding in zip(documents, embeddings):
+        points.append(
+            PointStruct(
+                id = document["chunk_id"],
+                vector = embedding,
+                payload= {
+                    "chunk_id": document["chunk_id"],
+                    "text": document["text"]
+                }
+            )
+        )
+```
+- We pair each chunk document with its generated embedding.
+- We construct a Qdrant **`PointStruct`**:
+  - `id`: An integer ID representing the point.
+  - `vector`: The 768-dimension floating-point array.
+  - `payload`: A key-value storage dict containing the original source text (`text`) and the `chunk_id`. This metadata payload is what is returned to the user when a search is matched.
+
+```python
+    # uploading points to qdrant
+    client.upsert(collection_name=COLLECTION_NAME, points=points)
+    print(f"Uploaded {len(points)} chunks to Qdrant")
+```
+- We execute a bulk upsert (`client.upsert`) to save all computed points in our Qdrant vector database collection.
+
+```python
+if __name__ == "__main__":
+    ingest_documents("data")
+```
+- Ingestion runs on the local folder named `"data"` by default when the script is run directly.
+
+### Flow of the Script
+1. Loops through the `"data"` folder reading all `.txt` documents.
+2. Splits raw file texts into semantic paragraphs via `SemanticChunker`.
+3. Converts all chunk paragraphs into 768-length floating-point arrays using `embedding_model.embed_documents()`.
+4. Packages each vector, its ID, and original text payload into `PointStruct` configurations.
+5. Performs a single batch upsert to Qdrant collection `"research_agent"`.
