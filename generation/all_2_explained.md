@@ -143,5 +143,12 @@ async def review_answer(query: str, answer: str, retrieval_results: list[dict]) 
     }
 ```
 - We print the reviewer node's evaluation status directly to the terminal console so we can see the reflection loop in action.
-- Finally, we return the status and clean feedback to the graph. We use a fallback `(response.feedback or "")` to ensure feedback is never `None`.
+- Finally, we return the status and clean feedback to the graph. Let's explain the line `'feedback': (response.feedback or "") if response.status == "fail" else ""` step-by-step:
+  - **The Condition (`if response.status == "fail" else ""`)**:
+    - If status is `"pass"`, it immediately goes to `else ""` and returns an empty string `""` because no feedback is needed.
+    - If status is `"fail"`, it evaluates the left side: `(response.feedback or "")`.
+  - **The Safety Net (`response.feedback or ""`)**:
+    - If `response.feedback` has a text critique like `"Missing details"`, Python returns that text.
+    - If `response.feedback` is `None` (JSON `null`), Python treats `None` as falsy and falls back to `""` (empty string).
+  - This ensures our state's feedback key is always a clean string (`str`) and never `None`, avoiding any Pydantic schema validation errors.
 
