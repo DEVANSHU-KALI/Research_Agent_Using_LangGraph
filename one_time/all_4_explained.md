@@ -249,3 +249,12 @@ if __name__ == "__main__":
 3. Converts all chunk paragraphs into 768-length floating-point arrays using `embedding_model.embed_documents()`.
 4. Packages each vector, its ID, and original text payload into `PointStruct` configurations.
 5. Performs a single batch upsert to Qdrant collection `"research_agent"`.
+
+### Alternative Options
+- **Alternative Loaders**:
+  - Using LangChain's native loaders like `DirectoryLoader` or `TextLoader` to automatically load directories.
+  - Adding PDF loaders (`PyPDF`), CSV loaders (`CSVLoader`), or word doc loaders to support formats other than plain `.txt`.
+- **Alternative Metadata payloads**:
+  - Storing file origins (e.g., `payload = {"source": filename, ...}`) to let the user filter results by document names or creation date.
+- **Batch Uploading**:
+  - For huge datasets, chunking the upsert requests (e.g. 100 points at a time) to prevent networking timeout issues.
