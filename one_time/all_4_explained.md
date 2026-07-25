@@ -83,4 +83,29 @@ async def initialize_qdrant() -> None:
 - **Line-by-Line Highlights**:
   - `await qdrant_client.get_collections()`: Asynchronously retrieves all collections currently residing in Qdrant.
   - `if COLLECTION_NAME not in collection_names`: We check whether the `"research_agent"` collection already exists to avoid redundant creation.
-  - `vectors_config=VectorParams(size=768, distance=Distance.COSINE)`: Defines the vector settings. **`size=768`** is mandatory because it matches the output dimensions of our `all-mpnet-base-v2` embedding model. **`Distance.COSINE`** configures Qdrant to use **Cosine Similarity** to compare vector queries (which is standard and recommended for 
+  - `vectors_config=VectorParams(size=768, distance=Distance.COSINE)`: Defines the vector settings. **`size=768`** is mandatory because it matches the output dimensions of our `all-mpnet-base-v2` embedding model. **`Distance.COSINE`** configures Qdrant to use **Cosine Similarity** to compare vector queries (which is standard and recommended for sentence-transformers).
+
+```python
+import asyncio
+
+if __name__ == "__main__":
+    asyncio.run(initialize_qdrant())
+```
+- An entry point that executes our asynchronous setup function using standard Python asyncio runner.
+
+### Flow of the Script
+1. Connects to the local Qdrant container at `localhost:6333`.
+2. Inspects all existing collection names.
+3. Checks if `"research_agent"` is missing.
+4. If missing, it creates the collection configured for 768 dimensions and cosine similarity, then prints success.
+5. If it already exists, it skips collection creation and outputs a status message.
+
+### Alternative Options
+- **Alternative Databases**:
+  - *Local Vector DBs*: ChromaDB (extremely lightweight, runs directly in Python process memory without Docker), FAISS (fast similarity indexing engine by Meta).
+  - *Cloud-Hosted DBs*: Pinecone (fully managed, zero configuration), Milvus, Weaviate.
+  - *Relational DBs*: PostgreSQL with the `pgvector` extension.
+- **Alternative Distance Metrics**:
+  - `Distance.EUCLIDEAN` (L2 distance metric) or `Distance.DOT` (Dot Product metric).
+
+---
