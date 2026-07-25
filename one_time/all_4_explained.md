@@ -186,3 +186,24 @@ def ingest_documents(folder_path: str) -> None:
             text = file.read()
 ```
 - We loop through the files inside the target directory (`data`), filtering out any non-txt files, and reading their text content.
+
+```python
+        # creating chunks from text
+        chunks = text_splitter.create_documents([text])
+
+        for chunk in chunks:
+            documents.append(
+                {'chunk_id':chunk_id, 'text': chunk.page_content}
+            )
+            chunk_id += 1       
+```
+- We call `text_splitter.create_documents([text])` to split the raw string into semantic chunk documents.
+- We assign a unique incremental `chunk_id` to each chunk and store them inside the `documents` list.
+
+```python
+    # generate embeddings
+    chunk_texts = [document["text"] for document in documents]
+    embeddings = embedding_model.embed_documents(chunk_texts)
+```
+- We isolate all chunk text strings into a list.
+- We call `embedding_model.embed_documents()` to generate the dense vector representation for each chunk in a single batch.
