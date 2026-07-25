@@ -59,3 +59,28 @@ qdrant_client = AsyncQdrantClient(host="localhost", port=6333)
 
 COLLECTION_NAME = "research_agent"
 ```
+- We establish a connection to a Qdrant instance running on `localhost:6333` (typically served via a Docker container).
+- We set our database table/collection name as `"research_agent"`.
+
+```python
+async def initialize_qdrant() -> None:
+    try:
+        collections = await qdrant_client.get_collections()
+        collection_names = [collection.name for collection in collections.collections]
+
+        if COLLECTION_NAME not in collection_names:
+            await qdrant_client.create_collection(
+                collection_name=COLLECTION_NAME,
+                vectors_config=VectorParams(size=768, distance=Distance.COSINE)
+            )
+            print('collection created!!')
+        else:
+            print('collection already exists')
+    except Exception as error:
+        print(f"failed to initialize collection {error}")
+        raise
+```
+- **Line-by-Line Highlights**:
+  - `await qdrant_client.get_collections()`: Asynchronously retrieves all collections currently residing in Qdrant.
+  - `if COLLECTION_NAME not in collection_names`: We check whether the `"research_agent"` collection already exists to avoid redundant creation.
+  - `vectors_config=VectorParams(size=768, distance=Distance.COSINE)`: Defines the vector settings. **`size=768`** is mandatory because it matches the output dimensions of our `all-mpnet-base-v2` embedding model. **`Distance.COSINE`** configures Qdrant to use **Cosine Similarity** to compare vector queries (which is standard and recommended for 
