@@ -148,3 +148,41 @@ text_splitter =  SemanticChunker(
   - *Token-based Splitters*: Splitting by exact Token limits (e.g., using `tiktoken` helper) to guarantee chunks never overflow the LLM's context windows.
 
 ---
+
+## 4. ingest_documents.py
+
+### What this script is
+This is the document ingestion pipeline. It reads all raw `.txt` files from a target directory, breaks them down using our semantic splitter, translates each chunk into a 768-dimension vector embedding, and uploads them (along with original text data) as searchable points into Qdrant.
+
+### Code Breakdown
+
+```python
+from qdrant_client import QdrantClient
+from qdrant_client.models import PointStruct
+import os
+from one_time.embedding_model import embedding_model
+from one_time.text_chunker import text_splitter
+
+COLLECTION_NAME = "research_agent"
+
+client = QdrantClient(host="localhost", port=6333)
+```
+- We import the synchronous `QdrantClient` for simple bulk ingestion, and `PointStruct` which is the data format that Qdrant expects for uploads.
+- We connect to Qdrant at `localhost:6333`.
+
+```python
+def ingest_documents(folder_path: str) -> None:
+    documents = []
+    chunk_id = 0
+
+    # read text file from the 
+    for filename in os.listdir(folder_path):
+        if not filename.endswith(".txt"):
+            continue
+        
+        file_path = os.path.join(folder_path, filename)
+
+        with open (file_path, "r", encoding="utf-8") as file:
+            text = file.read()
+```
+- We loop through the files inside the target directory (`data`), filtering out any non-txt files, and reading their text content.
