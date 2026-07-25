@@ -109,3 +109,42 @@ if __name__ == "__main__":
   - `Distance.EUCLIDEAN` (L2 distance metric) or `Distance.DOT` (Dot Product metric).
 
 ---
+
+## 3. text_chunker.py
+
+### What this script is
+This script defines our document chunking strategy. Before sending large documents to a vector database, they must be split into smaller, manageable text pieces. Rather than using arbitrary split counts, this script employs a **Semantic Chunker** that detects natural shifts in meaning to create chunks.
+
+### Code Breakdown
+
+```python
+from langchain_experimental.text_splitter import SemanticChunker
+from one_time.embedding_model import embedding_model
+```
+- We import `SemanticChunker` from LangChain's experimental modules.
+- We import the `embedding_model` we initialized in `embedding_model.py`. The semantic chunker uses this model to calculate how closely related adjacent sentences are.
+
+```python
+text_splitter =  SemanticChunker(
+    embedding_model,
+    breakpoint_threshold_type= 'percentile',
+    breakpoint_threshold_amount= 75
+)
+```
+- **How it works**:
+  - The chunker parses the document into sentences and embeds each sentence.
+  - It measures the semantic difference between consecutive sentences.
+  - `breakpoint_threshold_type='percentile'` with `breakpoint_threshold_amount=75` instructs the chunker to split the text at sentences where the semantic distance difference falls in the top 25% (greater than the 75th percentile of differences across the document). This creates boundaries where the topic actually shifts.
+
+### Flow of the Script
+1. Reads `embedding_model` configuration.
+2. Initializes the `SemanticChunker` instance with embedding analysis and percentile parameters.
+3. Exposes the configured `text_splitter` instance for document loaders to import and invoke.
+
+### Alternative Options
+- **Alternative Chunking Splitters**:
+  - `RecursiveCharacterTextSplitter`: Splits text based on raw characters (like double newlines `\n\n`, single newlines `\n`, spaces) down to a specific size (e.g., 500 characters chunk size, 50 characters overlap). It is much faster but lacks topic awareness.
+  - `CharacterTextSplitter`: Splits strictly on specific character occurrences.
+  - *Token-based Splitters*: Splitting by exact Token limits (e.g., using `tiktoken` helper) to guarantee chunks never overflow the LLM's context windows.
+
+---
