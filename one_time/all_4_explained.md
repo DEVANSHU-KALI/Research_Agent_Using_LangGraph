@@ -39,3 +39,23 @@ embedding_model = HuggingFaceEmbeddings(
   - Using Ollama or llama.cpp to serve embedding endpoints locally.
 
 ---
+
+## 2. qdrant_client.py
+
+### What this script is
+This script handles connecting to our local vector database (**Qdrant**) and initializing the collection where our document chunks will be stored. It ensures that the database environment is ready before any document ingestion takes place.
+
+### Code Breakdown
+
+```python
+from qdrant_client import AsyncQdrantClient
+from qdrant_client.models import Distance, VectorParams
+```
+- We import `AsyncQdrantClient` to allow asynchronous interaction with the Qdrant DB.
+- We import `Distance` and `VectorParams` which are configuration classes needed to set up collections inside Qdrant.
+
+```python
+qdrant_client = AsyncQdrantClient(host="localhost", port=6333)
+
+COLLECTION_NAME = "research_agent"
+```
