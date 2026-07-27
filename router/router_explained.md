@@ -68,3 +68,38 @@ class RouterSchema(BaseModel):
     decision: Literal["semantic", "internet", "hybrid"]
 ```
 - We define a strict schema structure. The LLM's classification must result in a field named `decision` containing exactly one of the three literal strings: `"semantic"`, `"internet"`, or `"hybrid"`.
+
+```python
+async def supervisor(query: str) -> dict:
+    prompt = f"""
+    You are the Supervisor Node...
+    """
+```
+- We define the asynchronous execution function. Inside it, we compile the long prompt detailing the exact guidelines, examples, and rules of the classification decision.
+
+```python
+    # Force JSON mode for compatibility with llama-3.1-8b-instant
+    structured_llm = client.with_structured_output(RouterSchema, method="json_mode")
+    response = await structured_llm.ainvoke(prompt)
+```
+- **Line Highlight**: `client.with_structured_output(RouterSchema, method="json_mode")` compiles the Llama model into a structured router. It forces the output to be JSON conforming to `RouterSchema`.
+- **Line Highlight**: We run `ainvoke(prompt)` asynchronously to execute the classification.
+
+```python
+    return {
+        'decision': response.decision,
+        'query': query,
+    }
+```
+- We return the classification result (`decision`) and forward the initial `query` value so it can be passed to the retrieved nodes.
+
+---
+
+### Flow of the Script
+1. The supervisor receives the user's raw query.
+2. The query is formatted at the tail-end of the long system prompt.
+3. The prompt is passed to the LLM with `json_mode` structured output.
+4. The LLM returns a structured object containing `decision` (`semantic`/`internet`/`hybrid`).
+5. Returns a dictionary mapping the decision and query.
+
+---
