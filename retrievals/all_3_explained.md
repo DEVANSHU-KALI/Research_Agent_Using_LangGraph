@@ -156,3 +156,20 @@ async def retrieve_internet(query: str) -> dict:
 - **Alternative Scraping**: Adding Jina Reader or Firecrawl to scrape complete web page markdown if short snippets aren't detailed enough.
 
 ---
+
+## 3. hybrid_retrieval.py (Helper / Standalone Hybrid Retriever)
+
+### What this script is
+This is a standalone helper script showing how to perform **Hybrid Retrieval** by triggering both the vector database search and the internet web search in parallel. 
+
+*Note: In our actual graph setup (`graph_builder.py`), we run these two nodes in parallel natively using LangGraph's map-reduce routing rather than calling this script as a node. However, this script is useful for running standalone queries.*
+
+### Example Output
+- **Input Query**: `"Compare our AI model with public models."`
+- **Returned Dictionary**:
+  ```python
+  {
+      "source": "hybrid",
+      "context": "Local Knowledge Base:\n\nOur AI model has 8 billion parameters and uses group-query attention.\n\nInternet Search Results:\n\n**Llama 3 Release**\nLlama 3 is a 8B parameter model released recently by Meta."
+  }
+  ```
