@@ -129,3 +129,30 @@ async def retrieve_internet(query: str) -> dict:
             }
         )
 ```
+- We extract the title and summary contents from the JSON response list.
+
+```python
+    context = "Internet Search Results:\n\n"
+    context += "\n\n".join(
+        f"**{result['title']}**\n{result['content']}"
+        for result in retrieved_results
+    )
+
+    return {
+        "source": "internet",
+        "context": context,
+    }
+```
+- We concatenate each search result using bold headings (`**{title}**`) and group them under the `"Internet Search Results:"` header.
+
+### Flow of the Script
+1. Accepts the search query.
+2. Queries the external Tavily Search API asynchronously.
+3. Groups search results into a clean markdown structure containing bold titles and content paragraphs.
+4. Returns the dictionary labeled with `"source": "internet"`.
+
+### Alternative Options
+- **Alternative APIs**: Serper API, Bing Search API, or Google Custom Search JSON API.
+- **Alternative Scraping**: Adding Jina Reader or Firecrawl to scrape complete web page markdown if short snippets aren't detailed enough.
+
+---
