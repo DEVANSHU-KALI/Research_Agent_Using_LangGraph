@@ -202,3 +202,12 @@ async def hybrid_retrieval(query: str) -> dict:
 ```
 - We join both the local semantic context block and the internet web results together and return them.
 
+### Flow of the Script
+1. Accepts the query.
+2. Uses `asyncio.gather` to concurrently execute both the local database vector search and the Tavily web search.
+3. Combines both resulting context blocks.
+4. Returns a single dictionary with source labeled `"hybrid"`.
+
+### Alternative Options
+- **Alternative Query Expansion**: Use an LLM to rewrite the single user query into two different queries (one optimized for internal database terminology and another optimized for google web search syntax) before executing the parallel searches.
+- **True Reciprocal Rank Fusion (RRF)**: Doing hybrid keyword (BM25) and vector search on the same dataset, then mathematical ranking merging (RRF) to blend semantic and exact-word matches.
