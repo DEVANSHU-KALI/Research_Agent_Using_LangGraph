@@ -173,3 +173,32 @@ This is a standalone helper script showing how to perform **Hybrid Retrieval** b
       "context": "Local Knowledge Base:\n\nOur AI model has 8 billion parameters and uses group-query attention.\n\nInternet Search Results:\n\n**Llama 3 Release**\nLlama 3 is a 8B parameter model released recently by Meta."
   }
   ```
+
+### Code Breakdown
+
+```python
+from retrievals.internet_retrieval import retrieve_internet
+from retrievals.semantic_retrieval import retrieve_chunks
+import asyncio
+```
+- We import the two retrieval functions we defined in the previous scripts, along with python's native `asyncio` library.
+
+```python
+async def hybrid_retrieval(query: str) -> dict:
+    semantic_results, internet_results = await asyncio.gather(
+        retrieve_chunks(query), 
+        retrieve_internet(query)
+    )
+```
+- **Line Highlight**: `asyncio.gather(...)` fires both asynchronous functions concurrently. The code waits until both have completed, cutting the total execution time in half compared to calling them one after the other.
+
+```python
+    context = semantic_results["context"] + "\n\n" + internet_results["context"]
+
+    return {
+        'source':'hybrid',
+        'context': context
+    }
+```
+- We join both the local semantic context block and the internet web results together and return them.
+
