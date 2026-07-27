@@ -101,3 +101,31 @@ This script defines the **Internet Node** in our LangGraph agent. When the super
       "context": "Internet Search Results:\n\n**Soccer Scores Today**\nTeam A defeated Team B 2-1 in the final minutes.\n\n**Match Analysis**\nThe match took place in London with Team A clinching victory."
   }
   ```
+
+### Code Breakdown
+
+```python
+import os
+from tavily import AsyncTavilyClient
+
+client = AsyncTavilyClient(os.getenv("TAVILY_API_KEY"))
+```
+- We load our Tavily API key from environment variables and initialize the `AsyncTavilyClient`.
+
+```python
+async def retrieve_internet(query: str) -> dict:
+    tavily_response = await client.search(query)
+```
+- **Line Highlight**: We asynchronously call `client.search(query)`. Tavily is a search engine optimized for AI agents and LLMs, which means it returns structured lists of clean titles and text summaries directly instead of raw HTML garbage.
+
+```python
+    retrieved_results = []
+
+    for result in tavily_response["results"]:
+        retrieved_results.append(
+            {
+                'title': result["title"],
+                "content": result["content"]
+            }
+        )
+```
