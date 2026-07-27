@@ -103,3 +103,10 @@ async def supervisor(query: str) -> dict:
 5. Returns a dictionary mapping the decision and query.
 
 ---
+
+### Alternative Options
+- **Alternative Classifiers**:
+  - *Regex/Keyword Classifier*: A simple Python script checking for keywords (e.g. if the query starts with `"weather"` or `"news"`, set status to internet). This has zero API cost but is not smart.
+  - *Local Embeddings Classifier*: Calculating similarity between the query and known category headers to route, avoiding generative LLM calls.
+- **Alternative Output Methods**:
+  - Instead of forcing `json_mode`, using LangChain tool calling/function calling API integrations if supported by your LLM provider.
