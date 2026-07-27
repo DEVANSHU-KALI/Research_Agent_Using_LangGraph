@@ -26,3 +26,16 @@ Question:
 Output:
 {{"decision": "semantic"}}
 ```
+
+#### Why are they doubled?
+This script defines the prompt inside a Python **f-string** (`f"""..."""`), which allows us to inject variables dynamically like `{query}` at the end of the text.
+
+In Python f-strings:
+- A single curly brace `{` or `}` indicates a **code placeholder** that Python tries to evaluate as a variable.
+- If we write a standard JSON example like `{"decision": "semantic"}`, Python will look for a variable named `"decision"` in our script, fail to find it, and throw a fatal **`KeyError`** during runtime.
+- To prevent this, we must **escape** the curly braces. In Python, doubling them (`{{` and `}}`) tells the f-string processor: *"Do not treat this as code; treat this as literal text."* 
+
+> [!WARNING]
+> Do not remove the double brackets! Removing them will break the script and crash your server with formatting errors.
+
+---
