@@ -39,3 +39,32 @@ In Python f-strings:
 > Do not remove the double brackets! Removing them will break the script and crash your server with formatting errors.
 
 ---
+
+### Example Output
+- **Input Query**: `"Compare our engineering salaries with the current public market."`
+- **Output Dictionary**:
+  ```python
+  {
+      'decision': 'hybrid',
+      'query': 'Compare our engineering salaries with the current public market.'
+  }
+  ```
+
+---
+
+### Code Breakdown
+
+```python
+from langchain_openai import ChatOpenAI
+import os
+from pydantic import BaseModel
+from typing import Literal
+```
+- We import `ChatOpenAI` from LangChain to initialize our model connection.
+- We import `BaseModel` and `Literal` from Pydantic/typing to define structured output models.
+
+```python
+class RouterSchema(BaseModel):
+    decision: Literal["semantic", "internet", "hybrid"]
+```
+- We define a strict schema structure. The LLM's classification must result in a field named `decision` containing exactly one of the three literal strings: `"semantic"`, `"internet"`, or `"hybrid"`.
