@@ -44,3 +44,29 @@ async def retrieve_chunks(query: str) -> dict:
         limit = 3
     )
 ```
+- **Line Highlight**: We run an asynchronous vector search using Qdrant's `query_points()`. We supply the computed `query_embedding` vector and specify a search limit (`limit=3`) to retrieve only the top 3 closest items.
+
+```python
+    retrieve_chunks = []
+
+    for point in result.points:
+        retrieve_chunks.append(
+            {
+            'text': point.payload['text']
+            }
+        )
+```
+- We loop through the search query results, extracting the text string stored inside Qdrant's payload metadata.
+
+```python
+    context = "Local Knowledge Base:\n\n"
+    context += "\n\n".join(
+        chunk['text'] for chunk in retrieve_chunks
+    )
+
+    return {
+        "source":"semantic",
+        "context":context
+    }
+```
+- We merge all retrieved chunks into a single text block, prefixing it with `"Local Knowledge Base:"` so the Writer LLM is aware of the source during generation.
