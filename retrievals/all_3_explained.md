@@ -70,3 +70,34 @@ async def retrieve_chunks(query: str) -> dict:
     }
 ```
 - We merge all retrieved chunks into a single text block, prefixing it with `"Local Knowledge Base:"` so the Writer LLM is aware of the source during generation.
+
+### Flow of the Script
+1. Accepts the query string from the graph state.
+2. Converts the query string into a dense vector embedding.
+3. Asynchronously queries the Qdrant server for the 3 most semantically similar points.
+4. Loops through result payloads to construct a single structured markdown string.
+5. Returns a structured dict containing the context and source label.
+
+### Alternative Options
+- **Alternative Re-ranking**: Add a Re-ranker model (like Cohere Re-rank or a local Cross-Encoder) to re-evaluate the top retrieved chunks and place the most relevant ones at the top before passing them to the generator.
+- **Alternative Similarity metric**: Changing the search distance configurations inside Qdrant to Euclidean or Dot Product distance depending on model specifications.
+
+---
+
+## 2. internet_retrieval.py (Internet Node)
+
+### What this script is
+This script defines the **Internet Node** in our LangGraph agent. When the supervisor determines that the user's query requires current or general web knowledge, this node uses the Tavily search engine to search the web, scrape text summaries, and format them as an external search context block.
+
+### Example Output
+- **Input Query**: `"Who won the latest soccer match today?"`
+- **Tavily Web Results**:
+  - *Result 1*: Title: `"Soccer Scores Today"`, Content: `"Team A defeated Team B 2-1 in the final minutes."`
+  - *Result 2*: Title: `"Match Analysis"`, Content: `"The match took place in London with Team A clinching victory."`
+- **Returned Dictionary**:
+  ```python
+  {
+      "source": "internet",
+      "context": "Internet Search Results:\n\n**Soccer Scores Today**\nTeam A defeated Team B 2-1 in the final minutes.\n\n**Match Analysis**\nThe match took place in London with Team A clinching victory."
+  }
+  ```
