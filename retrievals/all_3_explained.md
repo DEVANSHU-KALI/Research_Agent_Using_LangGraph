@@ -22,3 +22,25 @@ This script defines the **Semantic Node** in our LangGraph agent. It takes the u
       "context": "Local Knowledge Base:\n\nQuantum physics is the study of matter and energy at the most fundamental level.\n\nKey principles of quantum physics include superposition and entanglement.\n\nMax Planck is considered the father of quantum theory."
   }
   ```
+
+### Code Breakdown
+
+```python
+from one_time.qdrant_client import qdrant_client, COLLECTION_NAME
+from one_time.embedding_model import embedding_model
+```
+- We import our initialized local Qdrant client connection, target collection name, and the embedding model module from our setup files.
+
+```python
+async def retrieve_chunks(query: str) -> dict:
+    query_embedding =  embedding_model.embed_query(query)
+```
+- **Line Highlight**: `embed_query(query)` is a specific method that embeds the single user query string into a 768-dimension vector. *(Note: This is different from `embed_documents()` which is used to process a list of multiple strings in batch).*
+
+```python
+    result = await qdrant_client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_embedding,
+        limit = 3
+    )
+```
