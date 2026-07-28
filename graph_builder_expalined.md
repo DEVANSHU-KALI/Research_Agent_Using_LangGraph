@@ -98,3 +98,30 @@ async def internet_node(state: my_state):
     return {'retrieval_results': [retrieval_results]}
 ```
 - Performs a live web search and wraps result in a list.
+
+```python
+async def writer_node(state: my_state):
+    current_iter = state.get('iteration_count', 0) + 1
+    feedback = state.get('feedback', "")
+    final_answer = await writer(state['query'], state.get('retrieval_results', []), feedback)
+    return {
+        'final_answer': final_answer,
+        'iteration_count': current_iter
+    }
+```
+- Increments the loop tracker (`iteration_count`).
+- Reads the latest `feedback` (if any exists from a previous review).
+- Calls the writer node to synthesize a response, updating `final_answer`.
+
+```python
+async def reviewer_node(state: my_state):
+    review_result = await review_answer(
+        state['query'],
+        state['final_answer']['answer'],
+        state.get('retrieval_results', [])
+    )
+    return {
+        'review_status': review_result['status'],
+        'feedback': review_result['feedback']
+    }
+```
