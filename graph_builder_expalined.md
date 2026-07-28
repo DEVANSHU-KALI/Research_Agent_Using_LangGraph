@@ -204,3 +204,45 @@ builder.add_conditional_edges(
 
 graph = builder.compile()
 ```
+- Standard edges connecting the retrieval outputs directly into the Writer, and the Writer into the Reviewer.
+- Conditional edge exiting the Reviewer to decide whether to terminate (go to `END`) or loop back to `"Writer"`.
+- We call `builder.compile()` to convert the layout configuration into a runnable state machine.
+
+---
+
+## 4. Execution Flow Diagram
+
+Here is how data moves dynamically inside the compiled state machine:
+
+```
+                  [START]
+                     │
+                     ▼
+             ┌───────────────┐
+             │  Supervisor   │ ──► Sets decision
+             └───────────────┘
+                     │
+         ┌───────────┼───────────┐
+         │ (semantic)│ (internet)│ (hybrid - runs both)
+         ▼           ▼           ▼
+   ┌──────────┐ ┌──────────┐ ┌───────────────┐
+   │ Semantic │ │ Internet │ │ Run Parallel  │
+   └──────────┘ └──────────┘ └───────────────┘
+         │           │               │
+         └───────────┼───────────────┘
+                     │  (Appends to retrieval_results)
+                     ▼
+             ┌───────────────┐ ◄───┐
+             │    Writer     │     │
+             └───────────────┘     │ (loops back if fail)
+                     │             │
+                     ▼             │
+             ┌───────────────┐     │
+             │   Reviewer    │ ────┘
+             └───────────────┘
+                     │
+             ┌───────┴───────┐
+             │ (pass / max)  │ (fail & iter < 5)
+             ▼               ▼
+           [END]         (Loop back)
+```
