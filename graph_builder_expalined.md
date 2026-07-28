@@ -24,3 +24,31 @@ Our project uses a **modular architecture** (Separation of Concerns):
 - The core implementation logic is stored in separate modular folders: `/router`, `/retrievals`, and `/generation`.
 - `graph_builder.py` **only** imports these pure execution functions (like `supervisor`, `retrieve_chunks`, `writer`, `review_answer`).
 - Inside `graph_builder.py`, we write short, clean **wrapper functions** (e.g. `async def semantic_node(state)`) that read inputs from the graph state, call the imported logic, and return updates to the state.
+
+#### Why is this better?
+1. **Clean Code**: The graph layout remains easily readable.
+2. **Reusability**: You can call the retrieval and generation scripts independently for unit testing or command-line scripts without spinning up the whole graph.
+3. **Easy Maintenance**: If you need to change a prompt, you edit it in its respective folder, not inside the complex graph orchestrator.
+
+---
+
+## 3. Code Breakdown
+
+### Step 3.1: Imports and Client Logic
+
+```python
+from langgraph.graph import START, END, StateGraph
+from typing import TypedDict, Annotated
+from typing_extensions import NotRequired
+import operator
+
+from router.query_router import supervisor
+from retrievals.semantic_retrieval import retrieve_chunks
+from retrievals.internet_retrieval import retrieve_internet
+from generation.generator import generate_answer as writer
+from generation.reviewer import review_answer
+```
+- We import LangGraph's core layout structures (`StateGraph`, `START`, `END`).
+- We import modular functions from our packages to delegate execution tasks. Notice that we alias `generate_answer as writer` to keep graph names clean and intuitive.
+
+---
