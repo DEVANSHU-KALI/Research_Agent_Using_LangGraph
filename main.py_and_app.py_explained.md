@@ -139,3 +139,7 @@ Here is how data flows between the user, the frontend, the backend, and LangGrap
 
 ---
 
+## 6. Alternative Options
+- **WebSockets API**: Instead of HTTP Streaming (Server-Sent Events), you can use WebSockets. WebSockets allow bi-directional communication, meaning the frontend can send follow-up questions over the same connection.
+- **LangServe**: LangChain's official framework that automatically wraps LangGraph compilations in a fastapi web server, exposing `/stream` endpoints out of the box.
+- **Server Side Rendering (SSR)**: Standard JavaScript setups using Next.js/React standard fetch APIs with ReadableStreams to write typewriter interfaces in custom web apps.
