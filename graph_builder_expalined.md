@@ -73,3 +73,28 @@ builder = StateGraph(my_state)
   - This is vital when we run **parallel retrievals (Map-Reduce)** so that both nodes can write to the state concurrently without data loss.
 
 ---
+
+### Step 3.3: Node Wrapper Functions
+
+Each wrapper function acts as an interface between LangGraph's state and our modular scripts:
+
+```python
+async def supervisor_node(state: my_state):
+    res = await supervisor(state['query'])
+    return {'decision': res['decision']}
+```
+- Reads the `query` string, executes routing classification, and updates the `decision` state key.
+
+```python
+async def semantic_node(state: my_state):
+    retrieval_results = await retrieve_chunks(state['query'])
+    return {'retrieval_results': [retrieval_results]}
+```
+- Executes local database vector search. Note that the result is wrapped inside a list `[retrieval_results]` to match the list expectations of our `operator.add` state reducer.
+
+```python
+async def internet_node(state: my_state):
+    retrieval_results = await retrieve_internet(state['query'])
+    return {'retrieval_results': [retrieval_results]}
+```
+- Performs a live web search and wraps result in a list.
