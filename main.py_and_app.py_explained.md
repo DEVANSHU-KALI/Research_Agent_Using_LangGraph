@@ -98,3 +98,44 @@ Here is the exact code block from `main.py`:
 ## 4. Frontend Code Breakdown (`app.py`)
 
 Here is how the Streamlit client handles the backend stream:
+
+```python
+14:             response = requests.get(f"http://localhost:8000/stream?query={query}", stream=True)
+```
+- We invoke our FastAPI backend stream endpoint.
+- **`stream=True`** is critical: It tells the Python `requests` library to keep the connection open and stream the bytes, rather than loading the whole response into memory at once.
+
+```python
+16:             if response.status_code == 200:
+17:                 st.write_stream(response.iter_content(decode_unicode=True))
+```
+- `response.iter_content(decode_unicode=True)` iterates over the incoming stream chunks as they arrive from the backend, decoding them into standard text.
+- **`st.write_stream(...)`** is a built-in Streamlit function that accepts a text generator, automatically consumes the stream, and prints the tokens to the UI with a clean typewriter effect.
+
+---
+
+## 5. End-to-End Execution Flow
+
+Here is how data flows between the user, the frontend, the backend, and LangGraph:
+
+```
+[User Interface]           [Streamlit app.py]           [FastAPI main.py]          [LangGraph Engine]
+       │                            │                            │                         │
+       │─── 1. Submits Query ──────►│                            │                         │
+       │                            │─── 2. GET /stream ────────►│                         │
+       │                            │    (stream=True)           │─── 3. astream_events ──►│
+       │                            │                            │                         │
+       │                            │                            │◄── 4. Node starts ──────│
+       │                            │                            │                         │
+       │                            │                            │◄── 5. LLM Token ────────│
+       │                            │◄── 6. Yields Token ────────│    (Writer Node only)   │
+       ◄─── 7. Typewriter effect ───│                            │                         │
+       │                            │                            │◄── 8. Node completes ───│
+       │                            │                            │    (Stores iter_count)  │
+       │                            │                            │                         │
+       │                            │◄── 9. Final Iteration text─│                         │
+       ◄─── 10. Show complete ──────│                            │                         │
+```
+
+---
+
