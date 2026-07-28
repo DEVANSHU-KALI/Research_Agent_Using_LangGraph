@@ -29,6 +29,7 @@ Our project uses a **modular architecture** (Separation of Concerns):
 1. **Clean Code**: The graph layout remains easily readable.
 2. **Reusability**: You can call the retrieval and generation scripts independently for unit testing or command-line scripts without spinning up the whole graph.
 3. **Easy Maintenance**: If you need to change a prompt, you edit it in its respective folder, not inside the complex graph orchestrator.
+4. **Future changes**: If you want to go and change any node or anything it would be easier than just scrolling the single graph builder script.
 
 ---
 
@@ -49,6 +50,7 @@ from generation.generator import generate_answer as writer
 from generation.reviewer import review_answer
 ```
 - We import LangGraph's core layout structures (`StateGraph`, `START`, `END`).
+- The next three imports are used in the below scripts for some specific work.
 - We import modular functions from our packages to delegate execution tasks. Notice that we alias `generate_answer as writer` to keep graph names clean and intuitive.
 
 ---
@@ -67,10 +69,13 @@ class my_state(TypedDict):
 
 builder = StateGraph(my_state)
 ```
+- All the other keys are simple to understand, the only thing here to understand here is about the concept **Map Reducers**, explained below:
 - **The Reducer (`operator.add`)**:
   - By default, LangGraph overwrites state keys with the latest node's return dictionary.
   - For `retrieval_results`, we use `Annotated[list[dict], operator.add]`. This configuration tells LangGraph: *"Instead of overwriting this list, append new results to it."*
   - This is vital when we run **parallel retrievals (Map-Reduce)** so that both nodes can write to the state concurrently without data loss.
+  - In simple words, when the decision is `hybrid`, we run both the nodes parallelly, in normal condition, the first very first retrieval which completed its work and updated the state's key would be the final, but we don't that to happen right, so we use this `operator.add` which will just append the new retrieval's result to the list in which we already have some info present.
+  - when you think about adding concept, keep a eye on what `type` you are assigning to the value, it should be a list mainly, and its your choice about what you need inside that list.
 
 ---
 
