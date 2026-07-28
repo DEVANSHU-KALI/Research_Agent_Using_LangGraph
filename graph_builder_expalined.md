@@ -156,3 +156,51 @@ def route_review(state: my_state):
         
     return "fail"  # Go to Writer
 ```
+- **Loop Guard / Self-Reflection Routing**:
+  - If the answer fails review checks, it returns `"fail"`, looping back to the **Writer** node.
+  - If it passes, it returns `"pass"`, routing execution to the `END`.
+  - **Loop Guard**: If `iter_count >= 5`, it overrides the failing status and routes directly to the `END`. This prevents the agent from getting stuck in an infinite loop of generative refinement, saving API costs and execution timeouts.
+
+---
+
+### Step 3.5: Wiring the Graph
+
+```python
+builder.add_node("Supervisor", supervisor_node)
+builder.add_node('Semantic', semantic_node)
+builder.add_node('Internet', internet_node)
+builder.add_node('Writer', writer_node)
+builder.add_node('Reviewer', reviewer_node)
+
+builder.add_edge(START, "Supervisor")
+```
+- We register each node under a unique string name and link the start of the state machine directly to the Supervisor.
+
+```python
+builder.add_conditional_edges(
+    'Supervisor',
+    route_query,
+    {
+        "semantic": "Semantic",
+        "internet": "Internet",
+    },
+)
+```
+- Conditional route exiting the Supervisor: mapping the returning choices of `route_query` to their respective nodes.
+
+```python
+builder.add_edge("Semantic", "Writer")
+builder.add_edge("Internet", "Writer")
+builder.add_edge("Writer", "Reviewer")
+
+builder.add_conditional_edges(
+    'Reviewer',
+    route_review,
+    {
+        "pass": END,
+        "fail": "Writer",
+    }
+)
+
+graph = builder.compile()
+```
