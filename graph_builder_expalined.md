@@ -125,3 +125,34 @@ async def reviewer_node(state: my_state):
         'feedback': review_result['feedback']
     }
 ```
+- Passes the question, generated answer, and reference context to the reviewer.
+- Updates the quality checks status (`review_status` as `"pass"` or `"fail"`) and `feedback` instructions.
+
+---
+
+### Step 3.4: Conditional Routing & Loop Guard
+
+```python
+def route_query(state: my_state):
+    decision = state['decision']
+    if decision == 'hybrid':
+        return ['semantic', 'internet']
+    return [decision]
+```
+- **Parallel Fan-Out**: If the supervisor returns `"hybrid"`, this routing function returns a list containing both retrieval node names: `['semantic', 'internet']`. This instructs LangGraph to spin up both nodes in parallel.
+
+```python
+def route_review(state: my_state):
+    status = state.get('review_status', 'pass')
+    iter_count = state.get('iteration_count', 0)
+    
+    # Loop Guard
+    if iter_count >= 5 and status == 'fail':
+        print("--- [LOOP GUARD] Forced Exit after 5 iterations ---")
+        return "pass"  # Go to END
+        
+    if status == 'pass' or iter_count >= 5:
+        return "pass"  # Go to END
+        
+    return "fail"  # Go to Writer
+```
