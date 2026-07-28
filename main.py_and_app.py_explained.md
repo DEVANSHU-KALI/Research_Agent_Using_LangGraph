@@ -34,3 +34,38 @@ To prevent this:
 - We check `event.get("event") == "on_node_end"` for the `"Writer"` node to capture the updated state variables like `iteration_count`.
 
 ---
+
+## 3. Line-by-Line Explanation of the Streaming Logic
+
+Here is the exact code block from `main.py`:
+
+```python
+46: @app.get("/stream")
+47: async def stream_endpoint(query: str):
+```
+* **Line 46**: Declares a FastAPI GET endpoint at `/stream`.
+* **Line 47**: Defines the asynchronous handler function `stream_endpoint` which expects a `query` string parameter from the URL query string.
+
+```python
+48:     async def generate():
+49:         iter_count = 1
+```
+* **Line 48**: Defines a nested asynchronous generator function `generate()`. This function will yield text chunks back to FastAPI.
+* **Line 49**: Initializes a local variable `iter_count` to track the current iteration of the reflection loop (defaults to 1).
+
+```python
+50:         async for event in graph.astream_events({"query": query}, version="v2"):
+```
+* **Line 50**: Initiates an async loop iterating over events yielded by `graph.astream_events`. We feed the starting state `{"query": query}` into the graph.
+
+```python
+52:             if event.get("event") == "on_chat_model_stream":
+53:                 if event.get("metadata", {}).get("langgraph_node") == "Writer":
+54:                     token = event.get("data", {}).get("chunk", {}).content
+55:                     if token:
+56:                         yield token
+```
+* **Line 52**: Checks if the current event is a chat model stream event (an LLM generating a token).
+* **Line 53**: Safely inspects the metadata to check if the current event belongs to the `"Writer"` node.
+* **Line 54**: Extracts the raw text string content of the token chunk from the event payload.
+* **Line 55-56**: If the token is not empty, it yields it immediately to the HTTP response stream.
