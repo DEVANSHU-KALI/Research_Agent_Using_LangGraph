@@ -52,3 +52,24 @@ from generation.reviewer import review_answer
 - We import modular functions from our packages to delegate execution tasks. Notice that we alias `generate_answer as writer` to keep graph names clean and intuitive.
 
 ---
+
+### Step 3.2: State Schema with Reducer
+
+```python
+class my_state(TypedDict):
+    query: str
+    decision: NotRequired[str]
+    retrieval_results: Annotated[list[dict], operator.add]
+    final_answer: NotRequired[dict]
+    feedback: NotRequired[str]
+    iteration_count: NotRequired[int]
+    review_status: NotRequired[str]
+
+builder = StateGraph(my_state)
+```
+- **The Reducer (`operator.add`)**:
+  - By default, LangGraph overwrites state keys with the latest node's return dictionary.
+  - For `retrieval_results`, we use `Annotated[list[dict], operator.add]`. This configuration tells LangGraph: *"Instead of overwriting this list, append new results to it."*
+  - This is vital when we run **parallel retrievals (Map-Reduce)** so that both nodes can write to the state concurrently without data loss.
+
+---
