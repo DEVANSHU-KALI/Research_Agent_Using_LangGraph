@@ -69,3 +69,32 @@ Here is the exact code block from `main.py`:
 * **Line 53**: Safely inspects the metadata to check if the current event belongs to the `"Writer"` node.
 * **Line 54**: Extracts the raw text string content of the token chunk from the event payload.
 * **Line 55-56**: If the token is not empty, it yields it immediately to the HTTP response stream.
+
+```python
+59:             elif event.get("event") == "on_node_end":
+60:                 if event.get("name") == "Writer":
+61:                     state_output = event.get("data", {}).get("output", {})
+62:                     iter_count = state_output.get("iteration_count", iter_count)
+```
+* **Line 59**: Checks if a graph node has finished its execution.
+* **Line 60**: Verifies if the node that finished is the `"Writer"` node.
+* **Line 61**: Extracts the output state modifications returned by the Writer node wrapper function.
+* **Line 62**: Updates the local `iter_count` variable using the `iteration_count` key returned by the Writer (which increments by 1 on each run).
+
+```python
+64:         print(f"\n--- [COMPLETED] Stream finished (Iterations: {iter_count}) ---")
+65:         yield f"\n\n*(Generated in {iter_count} iteration(s))*"
+```
+* **Line 64**: Prints a status completion message to the backend server terminal console when the graph finished execution.
+* **Line 65**: Yields a final string message to the user UI, showing how many self-reflection cycles the RAG agent took to compile the final answer.
+
+```python
+67:     return StreamingResponse(generate(), media_type="text/plain")
+```
+* **Line 67**: Returns FastAPI's built-in `StreamingResponse` wrapping our async generator, telling the client's browser to read the response as a continuous stream of plain text rather than waiting for a completed JSON payload.
+
+---
+
+## 4. Frontend Code Breakdown (`app.py`)
+
+Here is how the Streamlit client handles the backend stream:
