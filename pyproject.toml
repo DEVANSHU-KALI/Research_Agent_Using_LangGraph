@@ -1,0 +1,21 @@
+[project]
+name = "research-agent"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+dependencies = [
+    "langgraph",
+    "langchain",
+    "langchain-openai",
+    "qdrant-client",
+    "tavily-python",
+    "sentence-transformers",
+    "python-dotenv",
+    "langchain-huggingface",
+    "langchain-experimental",
+    "fastapi",
+    "uvicorn",
+    "streamlit",
+    "requests",
+    "pydantic"
+]
