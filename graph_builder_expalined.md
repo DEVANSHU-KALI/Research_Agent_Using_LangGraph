@@ -95,7 +95,7 @@ async def semantic_node(state: my_state):
     retrieval_results = await retrieve_chunks(state['query'])
     return {'retrieval_results': [retrieval_results]}
 ```
-- Executes local database vector search. Note that the result is wrapped inside a list `[retrieval_results]` to match the list expectations of our `operator.add` state reducer.
+- whatever the decision is, based on that, specific retrieval method is choose and the state gets updated. Note that the result is wrapped inside a list `[retrieval_results]` to match the list expectations of our `operator.add` state reducer.
 
 ```python
 async def internet_node(state: my_state):
@@ -108,7 +108,7 @@ async def internet_node(state: my_state):
 async def writer_node(state: my_state):
     current_iter = state.get('iteration_count', 0) + 1
     feedback = state.get('feedback', "")
-    final_answer = await writer(state['query'], state.get('retrieval_results', []), feedback)
+    final_answer = await writer(state['query'], state.get ('retrieval_results', []), feedback)
     return {
         'final_answer': final_answer,
         'iteration_count': current_iter
@@ -120,7 +120,7 @@ async def writer_node(state: my_state):
 
 ```python
 async def reviewer_node(state: my_state):
-    review_result = await review_answer(
+    review_result = await review_answer(    
         state['query'],
         state['final_answer']['answer'],
         state.get('retrieval_results', [])
@@ -130,11 +130,11 @@ async def reviewer_node(state: my_state):
         'feedback': review_result['feedback']
     }
 ```
-- Passes the question, generated answer, and reference context to the reviewer.
+- Passes the question, generated answer, and reference context to the reviewer node.
 - Updates the quality checks status (`review_status` as `"pass"` or `"fail"`) and `feedback` instructions.
-
+ 
 ---
-
+ 
 ### Step 3.4: Conditional Routing & Loop Guard
 
 ```python
@@ -145,6 +145,7 @@ def route_query(state: my_state):
     return [decision]
 ```
 - **Parallel Fan-Out**: If the supervisor returns `"hybrid"`, this routing function returns a list containing both retrieval node names: `['semantic', 'internet']`. This instructs LangGraph to spin up both nodes in parallel.
+- We only added this condition, because the default conditions would be any one of the retrieval node right!!.
 
 ```python
 def route_review(state: my_state):
